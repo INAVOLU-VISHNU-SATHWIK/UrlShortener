@@ -1,0 +1,30 @@
+package com.example.demo.Model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Data;
+
+@Entity
+@Data
+public class Url {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String longUrl;
+
+    @Column(unique = true)
+    private String shortCode;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime expiry;
+
+    private int clickCount;
+}

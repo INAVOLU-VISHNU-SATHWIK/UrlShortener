@@ -1,0 +1,11 @@
+package com.example.demo.Repository;
+
+import org.apache.el.stream.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.demo.Model.Url;
+
+public interface UrlRepository extends JpaRepository<Url, Long> {
+
+    Optional findByShortCode(String shortCode);
+}

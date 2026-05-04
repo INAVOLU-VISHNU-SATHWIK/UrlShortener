@@ -1,0 +1,29 @@
+package com.example.demo.Controller;
+
+@RestController
+@RequestMapping("/")
+public class UrlController {
+
+    @Autowired
+    private UrlRepository repository;
+
+    @PostMapping("/shorten")
+    public String shortenUrl(@RequestBody String longUrl) {
+
+        Url url = new Url();
+        url.setLongUrl(longUrl);
+       // url.setShortCode(UUID.randomUUID().toString().substring(0, 6));
+        url.setCreatedAt(LocalDateTime.now());
+
+      //  repository.save(url);
+        repository.save(url);
+        
+        String shortCode = Base62Encoder.encode(url.getId());
+
+        url.setShortCode(shortCode);
+
+        repository.save(url);
+
+        return "http://localhost:8080/" + shortCode;
+    }
+}

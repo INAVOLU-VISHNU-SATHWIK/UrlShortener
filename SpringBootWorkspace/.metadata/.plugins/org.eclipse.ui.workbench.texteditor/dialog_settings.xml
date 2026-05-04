@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="java.lang.Class">
+		<item key="replaceBarOpen" value="false"/>
+		<list key="findhistory">
+			<item value="&lt;dependency&gt;"/>
+			<item value="&lt;version&gt;4.0.6&lt;/version&gt;"/>
+			<item value="&lt;optional&gt;true&lt;/optional&gt;"/>
+			<item value="&lt;artifactId&gt;spring-boot-starter-webmvc&lt;/artifactId&gt;"/>
+		</list>
+	</section>
+</section>

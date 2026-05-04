@@ -1,0 +1,24 @@
+package com.example.Model;
+
+import jakarta.persistence.Entity;
+import lombok.Data;
+
+@Entity
+@Data
+public class Url {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String longUrl;
+
+    @Column(unique = true)
+    private String shortCode;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime expiry;
+
+    private int clickCount;
+}
