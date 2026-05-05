@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.example.demo.Model.Url;
 import com.example.demo.Repository.UrlRepository;
@@ -22,13 +24,15 @@ import com.example.demo.util.Base62Encoder;
 
 @RestController
 @RequestMapping("/")
+@CrossOrigin("*")
 public class UrlController {
 
     @Autowired
     private UrlRepository repository;
     @Autowired
     private StringRedisTemplate redisTemplate;
-
+    @Value("${app.base-url}")
+    private String baseUrl;
     @PostMapping("/shorten")
     public UrlResponse shortenUrl(@RequestBody UrlRequest request) {
 
@@ -56,7 +60,7 @@ public class UrlController {
         repository.save(url);
 
         return new UrlResponse(
-        	    "http://localhost:8080/" + shortCode,
+        		baseUrl + "/" + shortCode,
         	    url.getLongUrl()
         	);
     }
