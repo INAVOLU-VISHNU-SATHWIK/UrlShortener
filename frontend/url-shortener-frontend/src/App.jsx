@@ -68,21 +68,23 @@ function App() {
           
           <h2 className="text-xl font-semibold mb-4 text-purple-600">Create Short URL</h2>
 
-          <input
-            type="text"
-            placeholder="Enter long URL..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+         <input
+  type="text"
+  placeholder="Enter long URL..."
+  value={url}
+  onChange={(e) => setUrl(e.target.value)}
+  /* bg-slate-800 makes the box dark, text-white makes typing white */
+  className="w-full p-3 bg-slate-800 text-white border border-slate-700 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400"
+/>
 
-          <input
-            type="text"
-            placeholder="Custom alias (optional)"
-            value={alias}
-            onChange={(e) => setAlias(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
+<input
+  type="text"
+  placeholder="Custom alias (optional)"
+  value={alias}
+  onChange={(e) => setAlias(e.target.value)}
+  /* Applied the same dark background and white text here */
+  className="w-full p-3 bg-slate-800 text-white border border-slate-700 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400 placeholder:text-gray-400"
+/>
 
           <button
             onClick={handleShorten}
