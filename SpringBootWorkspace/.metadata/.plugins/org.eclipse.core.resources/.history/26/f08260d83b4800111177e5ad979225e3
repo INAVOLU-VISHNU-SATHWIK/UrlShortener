@@ -1,0 +1,11 @@
+package com.example.demo.dto;
+
+ppackaimport lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class UrlResponse {
+    private String shortUrl;
+    private String originalUrl;
+}

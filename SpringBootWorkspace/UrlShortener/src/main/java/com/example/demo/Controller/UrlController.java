@@ -4,6 +4,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.Model.Url;
 import com.example.demo.Repository.UrlRepository;
+import com.example.demo.dto.UrlRequest;
+import com.example.demo.dto.UrlResponse;
 import com.example.demo.util.Base62Encoder;
 
 @RestController
@@ -23,42 +26,74 @@ public class UrlController {
 
     @Autowired
     private UrlRepository repository;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @PostMapping("/shorten")
-    public String shortenUrl(@RequestBody String longUrl) {
+    public UrlResponse shortenUrl(@RequestBody UrlRequest request) {
 
         Url url = new Url();
-        url.setLongUrl(longUrl);
-       // url.setShortCode(UUID.randomUUID().toString().substring(0, 6));
+        url.setLongUrl(request.getUrl());
         url.setCreatedAt(LocalDateTime.now());
-        url.setExpiry(LocalDateTime.now().plusDays(1)); // expires in 1 day
+        url.setExpiry(LocalDateTime.now().plusDays(1));
 
-      //  repository.save(url);
+        // Save first to get ID
         repository.save(url);
-        
-        String shortCode = Base62Encoder.encode(url.getId());
+
+        String shortCode;
+
+        if (request.getAlias() != null && !request.getAlias().isEmpty()) {
+            // Check if alias already exists
+            if (repository.findByShortCode(request.getAlias()).isPresent()) {
+                throw new RuntimeException("Alias already taken");
+            }
+            shortCode = request.getAlias();
+        } else {
+            shortCode = Base62Encoder.encode(url.getId());
+        }
 
         url.setShortCode(shortCode);
-
         repository.save(url);
 
-        return "http://localhost:8080/" + shortCode;
+        return new UrlResponse(
+        	    "http://localhost:8080/" + shortCode,
+        	    url.getLongUrl()
+        	);
     }
     @GetMapping("/{shortCode}")
     public ResponseEntity<?> redirect(@PathVariable String shortCode) {
 
-        Url url = repository.findByShortCode(shortCode)
-                .orElseThrow(() -> new RuntimeException("URL not found"));
+        // 1. Check Redis first
+        String longUrl = redisTemplate.opsForValue().get(shortCode);
 
-        // Check expiry
+        Url url;
+
+        if (longUrl != null) {
+            // Found in cache
+            url = new Url();
+            url.setLongUrl(longUrl);
+        } else {
+            // Fetch from DB
+            url = repository.findByShortCode(shortCode)
+                    .orElseThrow(() -> new RuntimeException("URL not found"));
+
+            // Store in Redis
+            redisTemplate.opsForValue().set(shortCode, url.getLongUrl());
+        }
+
+        // Expiry check
         if (url.getExpiry() != null && url.getExpiry().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Link expired");
-        }		
+        }
 
-        // Increase click count
-        url.setClickCount(url.getClickCount() + 1);
-        repository.save(url);
+        // Click tracking (only if DB object)
+        if (url.getId() != null) {
+            url.setClickCount(url.getClickCount() + 1);
+            repository.save(url);
+        }
 
-        return ResponseEntity.status(HttpStatus.GONE).body("Link expired");
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(url.getLongUrl()))
+                .build();
     }
 }
